@@ -52,8 +52,12 @@ def main():
     args=parser.parse_args()
 
     #統計次數
-    save_summary=0
-    verify_summary=0
+    summary={
+        "save":0,
+        "passed":0,
+        "fail":0,
+        "norecord":0
+    }
 
     #要求存取hash值
     if("s" in args.m):
@@ -80,15 +84,14 @@ def main():
             for filename in files:
                 file_path=os.path.join(root,filename)
                 hash_value=fn.calculate_hash(file_path,args.a)
-                fn.save_hash(file_path,hash_value,hash_file)
-                save_summary+=1
+                fn.save_hash(file_path,hash_value,hash_file,args.s)
+                summary["save"]+=1
 
-        print(f"✅ Hash file saved successfully!*{save_summary}")
+        print(f"✅ Hash file saved successfully!*{summary['save']}")
 
     #要求對比hash值
     if("v" in args.m):
-        verify_dir=args.v
-        validate.directory(verify_dir)
+        validate.directory(args.v)
 
         #讀取已有的hash值存取txt檔
         if("s" not in args.m):
@@ -96,13 +99,15 @@ def main():
             validate.file(hash_file)
 
         #逐一對比hash值
-        for root,dirs,files in os.walk(verify_dir):
+        for root,dirs,files in os.walk(args.v):
             for filename in files:
                 file_path=os.path.join(root,filename)
-                fn.verify_hash(file_path,hash_file,args.a)
-                verify_summary+=1
+                summary.update(fn.verify_hash(file_path,hash_file,args.a,args.v,summary))
 
-        print(f"✅ File checked successfully!*{verify_summary}")
+        print(f" Integrity check Summary:\n"
+              f"✅ passed*{summary['passed']}\n"
+              f"⚠️ failed*{summary['fail']}\n"
+              f"❌ No record found*{summary['norecord']}")
 
 if(__name__=="__main__"):
     main()
