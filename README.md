@@ -45,10 +45,10 @@ python '__main__.py' -m sv -a sha256 -fm w -s '/path/to/directory' -f '/path/to/
 
 ## 輸出示例
 - 保存成功:
-```
- ✅ Hash file saved successfully!*5
-    Hash_file path: '/path/to/hash_file.txt'
-```
+  ```
+  ✅ Hash file saved successfully!*5
+     Hash_file path: '/path/to/hash_file.txt'
+  ```
 - 驗證摘要:
   ```
   ✅ Integrity check Summary:
