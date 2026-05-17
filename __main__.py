@@ -3,10 +3,16 @@ import hashlib
 import argparse
 import input_validation as validate
 import function as fn
+from rich.console import Console
+console = Console()
+
 
 def main():
+
+    #CLI參數
     parser=argparse.ArgumentParser(description="Hash Save & Verify Tool")
 
+    #執行模式
     parser.add_argument(
         "-m","--mode",
         choices=["s","v","sv"],
@@ -15,6 +21,7 @@ def main():
         dest="m"
     )
 
+    #雜湊算法
     parser.add_argument(
         "-a","--algorithm",
         choices=hashlib.algorithms_available,
@@ -23,6 +30,7 @@ def main():
         dest="a"
     )
 
+    #文件模式
     parser.add_argument(
         "-fm","--file-mode",
         choices=["w","a"],
@@ -31,22 +39,32 @@ def main():
         dest="fm"
     )
 
+    #需存取hash值的目錄
     parser.add_argument(
         "-s","--save-dir",
         help="Save_Dir Path",
         dest="s"
     )
 
+    #存取hash值的txt檔路徑
     parser.add_argument(
         "-f","--hash-file",
         help="Hash_File Path",
         dest="f"
     )
 
+    #需對比hash值的目錄
     parser.add_argument(
         "-v","--verify-file",
         help="Verify_dir Path",
         dest="v"
+    )
+
+    #錯誤日誌輸出路徑
+    parser.add_argument(
+        "-el","--error-log",
+        help="Error log file path (optional)",
+        dest="el"
     )
 
     args=parser.parse_args()
@@ -56,7 +74,8 @@ def main():
         "save":0,
         "passed":0,
         "fail":0,
-        "norecord":0
+        "norecord":0,
+        "invalid":0
     }
 
     #要求存取hash值
@@ -84,10 +103,16 @@ def main():
             for filename in files:
                 file_path=os.path.join(root,filename)
                 hash_value=fn.calculate_hash(file_path,args.a)
-                fn.save_hash(file_path,hash_value,hash_file,args.s)
-                summary["save"]+=1
+                rel, err = fn.save_hash(file_path, hash_value, hash_file, args.s)
+                if rel:
+                    summary["save"]+=1
+                else:
+                    print(f"Failed to save hash for: {file_path} -> {err}")
 
-        print(f"✅ Hash file saved successfully!*{summary['save']}")
+        console.print("Hash file saved: \n"
+                f"  path: [bold blue]'{hash_file}'[/] \n"
+                f"  files hashed* {summary['save']}"
+        )
 
     #要求對比hash值
     if("v" in args.m):
@@ -98,16 +123,40 @@ def main():
             hash_file=args.f
             validate.file(hash_file)
 
+        # 載入hash文件
+        hash_dict,invalid_lines=fn.load_hash_file(hash_file)
+        summary["invalid"]+=len(invalid_lines)
+
+        error_list=invalid_lines[:]
+
         #逐一對比hash值
         for root,dirs,files in os.walk(args.v):
             for filename in files:
                 file_path=os.path.join(root,filename)
-                summary.update(fn.verify_hash(file_path,hash_file,args.a,args.v,summary))
+                summary,error_msg=fn.verify_hash(file_path,hash_dict,args.a,args.v,summary)
+                if error_msg:
+                    error_list.append(error_msg)
 
-        print(f" Integrity check Summary:\n"
-              f"✅ passed*{summary['passed']}\n"
-              f"⚠️ failed*{summary['fail']}\n"
-              f"❌ No record found*{summary['norecord']}")
+        # 輸出錯誤日誌
+        if args.el:
+            error_log_path = validate.resolve_error_log_path(args.el, args.v)
+            with open(error_log_path, "w", encoding="utf-8") as f:
+                f.write("Error Log\n"
+                    "==========\n"
+                    f"{fn.render_summary(summary)}\n\n")
+                if error_list:
+                    f.write("Issues:\n")
+                    for error in error_list:
+                        f.write(f"- {error}\n")
+                else:
+                    f.write("No issues detected.\n")
+            console.print(f"Error log saved: [bold blue]'{error_log_path}'[/]")
+
+        print(fn.render_summary(summary))
+        if error_list and not args.el:
+            print("Issues detected. Use --error-log <path> to save details.")
+        elif not error_list:
+            print("No issues detected.")
 
 if(__name__=="__main__"):
     main()
