@@ -1,64 +1,77 @@
-# File Hash Save & Verify Tool
+# dirhash
 
-一個用於保存和驗證文件哈希值的命令行工具，幫助檢查文件完整性。
+A command-line tool for saving and verifying file hash values to ensure file integrity.
 
-## 功能
-- **保存模式 (s)**: 計算目錄中所有文件的哈希值並保存到 TXT 文件。
-- **驗證模式 (v)**: 比對現有哈希文件來檢查文件是否被修改。
-- **保存與驗證模式 (sv)**: 同時執行保存和驗證。
-- 支援多種哈希算法（默認 SHA256）。
-- 支援寫入或追加模式。
+## Features
+- **Save Mode (s)**: Computes hashes for all files in a directory and stores them in a text file.
+- **Verify Mode (v)**: Compares the current files against an existing hash file to detect modifications.
+- **Save & Verify Mode (sv)**: Executes both operations in a single run.
+- Supports multiple hash algorithms (default: sha256).
 
-## 安裝
-1. 確保安裝 Python 3.12 ~ 3.14。
-2. 安裝依賴：
+## Installation
+1. Ensure Python 3.13.13 is installed.
+2. Install the required dependency:
+   ```bash
+   pip install rich==15.0.0
    ```
-   pip install rich
-   ```
-3. 下載專案文件。
+3. Clone or download the project files.
 
-## 用法
-運行主程式 `__main__.py`：
+## Usage
+Run the main script, `__main__.py`:
 
-### 保存哈希值
-```
-python '__main__.py' -m s -a sha256 -fm w -s '/path/to/directory' -f '/path/to/hash_file.txt'
+### Save Hash Values
+```bash
+python '__main__.py' -m s -s 'save_directory_path' -f 'hash_file_path'
 ```
 
-### 驗證哈希值
-```
-python '__main__.py' -m v -a sha256 -f '/path/to/hash_file.txt' -v '/path/to/verify_directory'
-```
-
-### 保存與驗證
-```
-python '__main__.py' -m sv -a sha256 -fm w -s '/path/to/directory' -f '/path/to/hash_file.txt' -v '/path/to/verify_directory'
+### Verify Hash Values
+```bash
+python '__main__.py' -m v -v 'verify_directory_path' -f 'hash_file_path'
 ```
 
-### 參數說明
-- `-m, --mode`: 模式 (s/v/sv)
-- `-a, --algorithm`: 哈希算法 (默認 sha256)
-- `-fm, --file-mode`: 文件模式 (w=寫入, a=追加，默認 w)
-- `-s, --save-dir`: 保存哈希的目錄路徑
-- `-f, --hash-file`: 哈希文件路徑
-- `-v, --verify-file`: 驗證的目錄路徑
+### Save & Verify
+```bash
+python '__main__.py' -m sv -s 'save_directory_path' -v 'verify_directory_path' -f 'hash_file_path'
+```
 
-## 輸出示例
-- 保存成功:
+### Parameter Reference
+- `-m, --mode`: Execution mode (`s`, `v`, or `sv`).
+- `-a, --algorithm`: Hash algorithm (default: sha256).
+- `-fm, --file-mode`: File mode (`w` for write, `a` for append, default: `w`).
+- `-s, --save-dir`: Directory to scan and hash.
+- `-v, --verify-file`: Directory to verify.
+- `-f, --hash-file`: Path to the hash file.
+- `-el, --error-log`: Optional path for the verification error log.
+
+## Output Examples
+- Save successful:
+  ```text
+Scanning (save): [ ██ ██ ██ ██ ██ ██ ██ ██ ██ ██ ] 100.0%
+Hash file saved:
+  path: 'hash_file_path'
+  files hashed* number_of_files
   ```
-  ✅ Hash file saved successfully!*5
-     Hash_file path: '/path/to/hash_file.txt'
-  ```
-- 驗證摘要:
-  ```
-  ✅ Integrity check Summary:
-  ✅ passed*3 | ⚠️ failed*1 | ❌ No record found*1
+- Verification summary:
+  ```text
+Scanning (verify): [ ██ ██ ██ ██ ██ ██ ██ ██ ██ ██ ] 100.0%
+Error log saved: 'error_log_file'
+Integrity check summary
+  passed:        number_of_files
+  failed:        0
+  invalid lines: 0
+  no record:     0
+No issues detected.
   ```
 
-## 注意事項
-- 哈希文件格式: `相對路徑,哈希值`
-- 支援所有 hashlib 可用算法。
-- 使用 Rich 庫美化輸出。
+## Notes
+- Hash file format: `{"path": "relative_path", "hash": "hash_value"}`
+- Supports all algorithms available in `hashlib`.
+- Uses the Rich library for enhanced terminal output.
 
-## 授權
-此專案為開源，歡迎貢獻。
+## License
+This project is open source.
+
+## Author Information
+[YouTube](https://youtube.com/@BleedAngel_AMV)  
+[TikTok](https://tiktok.com/@bleedangel_amv)  
+[Instagram](https://instagram.com/bleedangel_amv)
