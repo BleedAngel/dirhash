@@ -1,9 +1,10 @@
 import os
 import hashlib
+import json
 from rich.console import Console
 console = Console()
 
-#計算hash值
+# 計算hash值
 def calculate_hash(file_path,algorithm):
     hash_func=hashlib.new(algorithm)
     with open(file_path,"rb") as f:
@@ -15,9 +16,15 @@ def calculate_hash(file_path,algorithm):
 #存取hash值至txt檔
 def save_hash(file_path,hash_value,hash_file,base_dir):
     relative_path = os.path.relpath(file_path, base_dir).replace(os.sep, "/")
+
+    # 轉JSON格式
+    record = {"path": relative_path, "hash": hash_value}
     try:
         with open(hash_file, "a", encoding="utf-8") as f:
-            f.write(f"{relative_path},{hash_value}\n")
+
+            # ensure_ascii=False 確保中文字符不被轉譯
+            json.dump(record, f, ensure_ascii=False)
+            f.write("\n")
     except OSError as e:
         console.print(f"[red]Error writing to hash file: {e}[/]")
         return None, str(e)
@@ -43,20 +50,37 @@ def verify_hash(file_path, hash_dict, algorithm, base_dir, summary):
         summary["norecord"]+=1
         return summary,error_msg
 
-#載入hash文件
+# 載入hash文件
 def load_hash_file(hash_file):
     hash_dict={}
     invalid_lines=[]
-    with open(hash_file,"r") as f:
+    with open(hash_file,"r", encoding='utf-8') as f:
         for line in f:
-            try:
-                stored_file,stored_hash=line.strip().split(",")
-                stored_file=stored_file.replace("\\", "/")
-                hash_dict[stored_file]=stored_hash
-            except ValueError:
-                error_msg=f"Invalid line in hash file: '{line.strip()}'"
-                invalid_lines.append(error_msg)
+            line = line.strip()
+            if not line:
                 continue
+
+            # 檢查是否符合JSON格式
+            try:
+                record = json.loads(line)
+                if isinstance(record, dict) and "path" in record and "hash" in record:
+                    stored_file = str(record["path"]).replace("\\", "/")
+                    hash_dict[stored_file] = str(record["hash"])
+                    continue
+                raise ValueError("Invalid JSON structure")
+            
+            # 若非JSON格式，嘗試解析為逗號分隔格式
+            except (json.JSONDecodeError, TypeError, ValueError):
+                try:
+
+                    # 以最後一個逗號為分隔點
+                    stored_file, stored_hash = line.rsplit(",", 1)
+                    stored_file = stored_file.replace("\\", "/")
+                    hash_dict[stored_file] = stored_hash
+                except ValueError:
+                    error_msg=f"Invalid line in hash file: '{line}'"
+                    invalid_lines.append(error_msg)
+                    continue
     return hash_dict,invalid_lines
 
 #輸出統計摘要
