@@ -98,15 +98,17 @@ def main():
         
         open(hash_file,args.fm).close()
 
-        #逐一生成並存取hash值
-        # 預先計算總檔案數以建立進度條（以總檔案樹的10%為單位）
-        total_files = 0
+        # 逐一生成並存取hash值
+        # 預先計算總檔案大小以建立進度條（以總檔案樹的10%為單位）
+        total_size = 0
         for _root, _dirs, files in os.walk(args.s):
-            total_files += len(files)
-        if total_files == 0:
-            total_files = 1
+            for file in files:
+                file_path = os.path.join(_root, file)
+                total_size += os.path.getsize(file_path)
+        if total_size == 0:
+            total_size = 1
 
-        processed = 0
+        processed_size = 0
         for root,dirs,files in os.walk(args.s):
             for filename in files:
                 file_path=os.path.join(root,filename)
@@ -117,14 +119,14 @@ def main():
                 else:
                     print(f"Failed to save hash for: {file_path} -> {err}")
 
-                # 更新進度條（10 個單位，每單位代表總檔案樹的10%）
-                processed += 1
-                units = int((processed * 10) / total_files)
+                # 更新進度條（10 個單位，每單位代表總檔案大小的10%）
+                processed_size += os.path.getsize(file_path)
+                units = int((processed_size * 10) / total_size)
                 if units > 10:
                     units = 10
                 # 使用白色方塊表示已完成的單位，未完成用空格占位，並保持單行輸出
                 bar = "".join([" ██" for _ in range(units)]) + "".join([" " for _ in range(10 - units+1)])
-                percent = (processed / total_files) * 100
+                percent = (processed_size / total_size) * 100
                 console.print(f"Scanning (save): [{bar}] {percent:5.1f}%", end='\r')
         # 掃描完成後換行以結束行內顯示
         console.print("")
@@ -149,15 +151,17 @@ def main():
 
         error_list=invalid_lines[:]
 
-        #逐一對比hash值
-        # 預先計算總檔案數以建立進度條（以總檔案樹的10%為單位）
-        total_files = 0
+        # 逐一對比hash值
+        # 預先計算總檔案大小以建立進度條（以總檔案樹的10%為單位）
+        total_size = 0
         for _root, _dirs, files in os.walk(args.v):
-            total_files += len(files)
-        if total_files == 0:
-            total_files = 1
+            for file in files:
+                file_path = os.path.join(_root, file)
+                total_size += os.path.getsize(file_path)
+        if total_size == 0:
+            total_size = 1
 
-        processed = 0
+        processed_size = 0
         for root,dirs,files in os.walk(args.v):
             for filename in files:
                 file_path=os.path.join(root,filename)
@@ -165,13 +169,13 @@ def main():
                 if error_msg:
                     error_list.append(error_msg)
 
-                # 更新進度條（10 個單位，每單位代表總檔案樹的10%）
-                processed += 1
-                units = int((processed * 10) / total_files)
+                # 更新進度條（10 個單位，每單位代表總檔案大小的10%）
+                processed_size += os.path.getsize(file_path)
+                units = int((processed_size * 10) / total_size)
                 if units > 10:
                     units = 10
-                bar = "".join(["⬜" for _ in range(units)]) + "".join([" " for _ in range(10 - units)])
-                percent = (processed / total_files) * 100
+                bar = "".join([" ██" for _ in range(units)]) + "".join([" " for _ in range(10 - units+1)])
+                percent = (processed_size / total_size) * 100
                 console.print(f"Scanning (verify): [{bar}] {percent:5.1f}%", end='\r')
         # 掃描完成後換行以結束行內顯示
         console.print("")
