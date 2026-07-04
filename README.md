@@ -11,9 +11,9 @@ A command-line tool for saving and verifying file hash values to ensure file int
 ## Installation
 1. Ensure Python 3.13.13 is installed.
 2. Install the required dependency:
-   ```bash
-   pip install rich==15.0.0
-   ```
+  ```bash
+  pip install -r requirements.txt
+  ```
 3. Clone or download the project files.
 
 ## Usage
@@ -21,22 +21,22 @@ Run the main script, `__main__.py`:
 
 ### Save Hash Values
 ```bash
-python '__main__.py' -m s -s 'save_directory_path' -f 'hash_file_path'
+python '__main__.py' -m s -s <save_directory_path> -f <hash_file_path>
 ```
 
 ### Verify Hash Values
 ```bash
-python '__main__.py' -m v -v 'verify_directory_path' -f 'hash_file_path'
+python '__main__.py' -m v -v <verify_directory_path> -f <hash_file_path> -el <error_log_path>
 ```
 
 ### Save & Verify
 ```bash
-python '__main__.py' -m sv -s 'save_directory_path' -v 'verify_directory_path' -f 'hash_file_path'
+python '__main__.py' -m sv -s <save_directory_path> -v <verify_directory_path> -f <hash_file_path> -el <error_log_path>
 ```
 
 ### Parameter Reference
 - `-m, --mode`: Execution mode (`s`, `v`, or `sv`).
-- `-a, --algorithm`: Hash algorithm (default: sha256).
+- `-a, --algorithm`: Hash algorithm (default: `sha256`).
 - `-fm, --file-mode`: File mode (`w` for write, `a` for append, default: `w`).
 - `-s, --save-dir`: Directory to scan and hash.
 - `-v, --verify-file`: Directory to verify.
@@ -44,27 +44,28 @@ python '__main__.py' -m sv -s 'save_directory_path' -v 'verify_directory_path' -
 - `-el, --error-log`: Optional path for the verification error log.
 
 ## Output Examples
-- Save successful:
-  ```text
+### Save
+```text
 Scanning (save): [ ██ ██ ██ ██ ██ ██ ██ ██ ██ ██ ] 100.0%
 Hash file saved:
-  path: 'hash_file_path'
-  files hashed* number_of_files
-  ```
-- Verification summary:
-  ```text
+  path: <hash_file_path>
+  files hashed* <number_of_files>
+```
+
+### Verify
+```text
 Scanning (verify): [ ██ ██ ██ ██ ██ ██ ██ ██ ██ ██ ] 100.0%
-Error log saved: 'error_log_file'
+Error log saved: <error_log_file>
 Integrity check summary
-  passed:        number_of_files
+  passed:        <number_of_files>
   failed:        0
   invalid lines: 0
   no record:     0
 No issues detected.
-  ```
+```
 
 ## Notes
-- Hash file format: `{"path": "relative_path", "hash": "hash_value"}`
+- Hash file format: `{"path": "relative_path", "hash": "hash_value"}`.
 - Supports all algorithms available in `hashlib`.
 - Uses the Rich library for enhanced terminal output.
 
@@ -72,6 +73,6 @@ No issues detected.
 This project is open source.
 
 ## Author Information
-[YouTube](https://youtube.com/@BleedAngel_AMV)  
-[TikTok](https://tiktok.com/@bleedangel_amv)  
-[Instagram](https://instagram.com/bleedangel_amv)
+- [YouTube](https://youtube.com/@BleedAngel_AMV)
+- [TikTok](https://tiktok.com/@bleedangel_amv)
+- [Instagram](https://instagram.com/bleedangel_amv)
